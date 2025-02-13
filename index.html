@@ -17,72 +17,118 @@
 
 	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, width=1024" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
-<!-- Your existing style -->
-<style>
-  /* circular gradient */
-  .key_circular_shading {
-    background-image: -webkit-gradient(radial, 50% 50%,0,50% 50%,200, from(rgba(0, 0, 0, 0.35)), to(rgba(0, 0, 0, 0.00))) !important;
-    background-image: -webkit-radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
-    background-image: -moz-radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
-    background-image: radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
-  }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dragon Keys Hype Document</title>
+  <style>
+    /* Adjust or add your Hype document styles as needed */
+    body {
+      background-color: #080000;
+      color: #fff;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .controls {
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-right: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    /********** STEP 1: Global Variables & Recording Functions **********/
+    // Global recording state variables
+    var recordedEvents = [];
+    var isRecording = false;
 
-<!-- Add this script right after your style -->
-<script>
-  // Global recording variables
-  var recordedEvents = [];
-  var isRecording = false;
-
-  // Call this to start recording key events
-  function startRecording() {
-    recordedEvents = []; // Clear any previous events
-    isRecording = true;
-    console.log("Recording started");
-  }
-
-  // Call this to stop recording key events
-  function stopRecording() {
-    isRecording = false;
-    console.log("Recording stopped. Recorded events:", recordedEvents);
-    // Optionally, send recordedEvents to your server here.
-  }
-
-  // Your dragalong1 function to capture key events and trigger sounds
-  function dragalong1(event) {
-    // Get event coordinates (works for both mouse and touch)
-    var eventX = event.clientX || (event.touches && event.touches[0].pageX);
-    var eventY = event.clientY || (event.touches && event.touches[0].pageY);
-
-    // Get the element at these coordinates, then its closest key element
-    var ele = document.elementFromPoint(eventX, eventY);
-    if (ele) {
-      ele = ele.closest(".key_circular_shading");
+    // Function to start recording: clears previous events and begins logging new ones.
+    function startRecording() {
+      recordedEvents = []; // Clear any previous events
+      isRecording = true;
+      console.log("Recording started");
     }
 
-    if (ele) {
-      // Only trigger if this key is not already active (prevents duplicate triggers)
-      if (hypeDocument.customData['currentSustain'] !== ele.id) {
-        hypeDocument.customData['currentSustain'] = ele.id;
+    // Function to stop recording: stops logging and logs the recorded events.
+    function stopRecording() {
+      isRecording = false;
+      console.log("Recording stopped. Recorded events:", recordedEvents);
+      // At this point, you can send recordedEvents to your server or process them further.
+    }
 
-        // Retrieve key info (assumes a data-keyname attribute)
-        var theKeyNumber = ele.dataset.keyname;
+    /********** STEP 2: dragalong1 Function Integration **********/
+    // This function is triggered on touch or mouse events over the keys.
+    function dragalong1(event) {
+      // Get event coordinates (works for both mouse and touch)
+      var eventX = event.clientX || (event.touches && event.touches[0].pageX);
+      var eventY = event.clientY || (event.touches && event.touches[0].pageY);
 
-        // This triggers your Hype sound behavior for the key
-        hypeDocument.triggerCustomBehaviorNamed(theKeyNumber);
+      // Find the element at the event point and locate its closest .key_circular_shading parent
+      var ele = document.elementFromPoint(eventX, eventY);
+      if (ele) {
+        ele = ele.closest(".key_circular_shading");
+      }
 
-        // If recording is on, log this event with its details
-        if (isRecording) {
-          recordedEvents.push({
-            keyId: ele.id,
-            keyName: theKeyNumber,
-            eventType: event.type,
-            timestamp: Date.now()
-          });
+      if (ele) {
+        // Only trigger if this key isn’t already the one being sustained
+        if (hypeDocument.customData['currentSustain'] !== ele.id) {
+          hypeDocument.customData['currentSustain'] = ele.id;
+
+          // Retrieve the key number from the element’s dataset
+          var theKeyNumber = ele.dataset.keyname;
+
+          // Trigger the Hype custom behavior for this key
+          hypeDocument.triggerCustomBehaviorNamed(theKeyNumber);
+
+          // If recording is active, log this event with its details
+          if (isRecording) {
+            recordedEvents.push({
+              keyId: ele.id,
+              keyName: theKeyNumber,
+              eventType: event.type,
+              timestamp: Date.now()
+            });
+          }
         }
       }
     }
-  }
+  </script>
+</head>
+<body>
+  <!-- STEP 3: Recording Controls & Hype Document Content -->
+  <div class="controls">
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop Recording</button>
+  </div>
+
+  <!-- Your Hype Scene Content (where the Dragon Keys are displayed) -->
+  <!-- Make sure the keys have the class "key_circular_shading" and proper data-keyname attributes -->
+  <div id="hypeScene">
+    <!-- Example key element -->
+    <div id="key1" class="key_circular_shading" data-keyname="C"></div>
+    <div id="key2" class="key_circular_shading" data-keyname="D"></div>
+    <!-- Add your other keys here -->
+  </div>
+
+  <script>
+    /********** STEP 4: Attach Event Listeners **********/
+    // Add event listeners for both touch and mouse events.
+    // You may adjust the target container if you want to limit where these events are captured.
+    document.addEventListener("touchstart", dragalong1);
+    document.addEventListener("touchmove", dragalong1);
+    document.addEventListener("mousedown", dragalong1);
+    document.addEventListener("mousemove", dragalong1);
+
+    // Note: If your Hype document already handles event listeners for your keys,
+    // make sure this code does not conflict with the existing handlers.
+  </script>
+</body>
+</html>
 
 	<!-- end copy -->
   </head>
@@ -90,7 +136,7 @@
 	<!-- copy these lines to your document: -->
 
 	<div id="dragonkeys_hype_container" class="HYPE_document" style="margin:auto;position:relative;width:100%;height:100%;overflow:hidden;">
-		<script type="text/javascript" charset="utf-8" src="Dragon%20Keys.hyperesources/dragonkeys_hype_generated_script.js?25203"></script>
+		<script type="text/javascript" charset="utf-8" src="Dragon%20Keys.hyperesources/dragonkeys_hype_generated_script.js?22774"></script>
 	</div>
 
 	<!-- end copy -->
@@ -101,8 +147,8 @@
 
 	<div style="display:none" aria-hidden=true>
 
-		<div> </div>
 		<div></div>
+		<div> </div>
 		<div>Dragon Keys
 </div>
 		<div>window.addEventListener("message", function(event) { if (event.data === "startRecording") { startRecording(); } else if (event.data === "stopRecording") { stopRecording(); } });</div>
