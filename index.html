@@ -15,22 +15,74 @@
 	</style>
 	<!-- copy these lines to your document head: -->
 
-	<meta name="viewport" content="user-scalable=no, width=1024" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, width=1024" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
-
-   
-  
-
- -->	
+<!-- Your existing style -->
 <style>
-/* circualr gradient  */
-.key_circular_shading {
-background-image: -webkit-gradient(radial, 50% 50%,0,50% 50%,200, from(rgba(0, 0, 0, 0.35)), to(rgba(0, 0, 0, 0.00))) !important;
-background-image: -webkit-radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
-background-image: -moz-radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
-background-image: radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
-}
-</style>	
+  /* circular gradient */
+  .key_circular_shading {
+    background-image: -webkit-gradient(radial, 50% 50%,0,50% 50%,200, from(rgba(0, 0, 0, 0.35)), to(rgba(0, 0, 0, 0.00))) !important;
+    background-image: -webkit-radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
+    background-image: -moz-radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
+    background-image: radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.35)) !important;
+  }
+</style>
+
+<!-- Add this script right after your style -->
+<script>
+  // Global recording variables
+  var recordedEvents = [];
+  var isRecording = false;
+
+  // Call this to start recording key events
+  function startRecording() {
+    recordedEvents = []; // Clear any previous events
+    isRecording = true;
+    console.log("Recording started");
+  }
+
+  // Call this to stop recording key events
+  function stopRecording() {
+    isRecording = false;
+    console.log("Recording stopped. Recorded events:", recordedEvents);
+    // Optionally, send recordedEvents to your server here.
+  }
+
+  // Your dragalong1 function to capture key events and trigger sounds
+  function dragalong1(event) {
+    // Get event coordinates (works for both mouse and touch)
+    var eventX = event.clientX || (event.touches && event.touches[0].pageX);
+    var eventY = event.clientY || (event.touches && event.touches[0].pageY);
+
+    // Get the element at these coordinates, then its closest key element
+    var ele = document.elementFromPoint(eventX, eventY);
+    if (ele) {
+      ele = ele.closest(".key_circular_shading");
+    }
+
+    if (ele) {
+      // Only trigger if this key is not already active (prevents duplicate triggers)
+      if (hypeDocument.customData['currentSustain'] !== ele.id) {
+        hypeDocument.customData['currentSustain'] = ele.id;
+
+        // Retrieve key info (assumes a data-keyname attribute)
+        var theKeyNumber = ele.dataset.keyname;
+
+        // This triggers your Hype sound behavior for the key
+        hypeDocument.triggerCustomBehaviorNamed(theKeyNumber);
+
+        // If recording is on, log this event with its details
+        if (isRecording) {
+          recordedEvents.push({
+            keyId: ele.id,
+            keyName: theKeyNumber,
+            eventType: event.type,
+            timestamp: Date.now()
+          });
+        }
+      }
+    }
+  }
 
 	<!-- end copy -->
   </head>
@@ -38,7 +90,7 @@ background-image: radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.
 	<!-- copy these lines to your document: -->
 
 	<div id="dragonkeys_hype_container" class="HYPE_document" style="margin:auto;position:relative;width:100%;height:100%;overflow:hidden;">
-		<script type="text/javascript" charset="utf-8" src="Dragon%20Keys.hyperesources/dragonkeys_hype_generated_script.js?2697"></script>
+		<script type="text/javascript" charset="utf-8" src="Dragon%20Keys.hyperesources/dragonkeys_hype_generated_script.js?25203"></script>
 	</div>
 
 	<!-- end copy -->
@@ -53,6 +105,7 @@ background-image: radial-gradient(50% 50%, rgba(0, 0, 0, 0.00), rgba(0, 0, 0, 0.
 		<div></div>
 		<div>Dragon Keys
 </div>
+		<div>window.addEventListener("message", function(event) { if (event.data === "startRecording") { startRecording(); } else if (event.data === "stopRecording") { stopRecording(); } });</div>
 		<div>    </div>
 
 	</div>
